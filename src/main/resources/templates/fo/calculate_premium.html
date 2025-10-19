@@ -18,7 +18,7 @@
             <h2 class="mb-4">Calculate Premium for Application #<span th:text="${application.applicationId}"></span></h2>
 
             <h5>Application Details</h5>
-            <p><strong>Customer:</strong> <span th:text="${application.user.firstName + ' ' + application.user.lastName}"></span></p>
+            <p><strong>Customer:</strong> <span th:if="${application.user != null}" th:text="${application.user.firstName + ' ' + application.user.lastName}"></span></p>
             <p><strong>Product:</strong> <span th:text="${application.productType}"></span></p>
             <p><strong>Coverage:</strong> <span th:text="${'$' + #numbers.formatDecimal(application.desiredCoverage, 0, 'COMMA', 2, 'POINT')}"></span></p>
 
