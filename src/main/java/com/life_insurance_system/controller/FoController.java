@@ -46,7 +46,7 @@ public class FoController {
     public String calculatePremium(@PathVariable int id, Model model, RedirectAttributes redirectAttributes) {
         Application application = applicationService.getApplicationById(id);
         if (application == null) {
-            redirectAttributes.addFlashAttribute("error", "Application not found.");
+            redirectAttributes.addFlashAttribute("error", "Application not found with ID: " + id);
             return "redirect:/fo/applications";
         }
         java.math.BigDecimal premium = premiumService.calculatePremium(application);
