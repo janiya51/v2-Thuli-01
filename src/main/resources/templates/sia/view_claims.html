@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assess Claims - LIMS</title>
+    <link rel="icon" href="https://i.imgur.com/s41tGvI.png" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <button class="mobile-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+    <div th:replace="~{sidebar :: sidebar(activePage='claims', roleName='Senior Insurance Advisor')}"></div>
+    <div class="main-content">
+        <div class="table-container">
+            <h2 class="mb-4">Claims Awaiting Assessment</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Claim ID</th>
+                            <th>Policy Number</th>
+                            <th>Claim Type</th>
+                            <th>Filing Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="claim : ${claims}" th:if="${claim.claimStatus.name() == 'PendingSIA'}">
+                            <td th:text="${claim.claimId}"></td>
+                            <td th:text="${claim.policy.policyNumber}"></td>
+                            <td th:text="${claim.claimType}"></td>
+                            <td th:text="${#dates.format(claim.filingDate, 'yyyy-MM-dd HH:mm')}"></td>
+                            <td><span class="badge bg-warning text-dark" th:text="${claim.claimStatus}"></span></td>
+                            <td>
+                                <a th:href="@{/sia/claim/assess/{id}(id=${claim.claimId})}" class="btn btn-sm btn-primary">Assess</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <a href="/sia/dashboard" class="btn btn-secondary mt-3">Back to Dashboard</a>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('sidebarToggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('active'));
+    </script>
+</body>
+</html>
