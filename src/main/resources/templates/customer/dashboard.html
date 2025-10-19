@@ -71,6 +71,43 @@
                 </a>
             </div>
         </div>
+
+        <div class="mt-5" data-aos="fade-up" data-aos-delay="600">
+            <h3 class="mb-4">My Applications</h3>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Coverage</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="app : ${applications}">
+                            <td th:text="${app.applicationId}"></td>
+                            <td th:text="${app.productType}"></td>
+                            <td th:text="${'$' + #numbers.formatDecimal(app.desiredCoverage, 0, 'COMMA', 2, 'POINT')}"></td>
+                            <td><span class="badge" th:classappend="${app.currentStatus.name() == 'PendingCustomer'} ? 'bg-success' : 'bg-secondary'" th:text="${app.currentStatus}"></span></td>
+                            <td>
+                                <div th:if="${app.currentStatus.name() == 'PendingCustomer'}">
+                                    <form th:action="@{/customer/application/accept}" method="post" class="d-inline">
+                                        <input type="hidden" name="applicationId" th:value="${app.applicationId}" />
+                                        <button type="submit" class="btn btn-sm btn-success">Accept Offer</button>
+                                    </form>
+                                    <form th:action="@{/customer/application/reject}" method="post" class="d-inline">
+                                        <input type="hidden" name="applicationId" th:value="${app.applicationId}" />
+                                        <button type="submit" class="btn btn-sm btn-danger">Reject Offer</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Bootstrap JS -->
