@@ -38,22 +38,16 @@ public class FoController {
 
     @GetMapping("/applications")
     public String viewFoApplications(Model model) {
-        model.addAttribute("applications", applicationService.getAllApplications());
+        java.util.List<Application> applications = applicationService.getAllApplications();
+        java.util.Map<Integer, java.math.BigDecimal> premiums = new java.util.HashMap<>();
+        for (Application app : applications) {
+            premiums.put(app.getApplicationId(), premiumService.calculatePremium(app));
+        }
+        model.addAttribute("applications", applications);
+        model.addAttribute("premiums", premiums);
         return "fo/view_applications";
     }
 
-    @GetMapping("/calculate-premium/{id}")
-    public String calculatePremium(@PathVariable int id, Model model, RedirectAttributes redirectAttributes) {
-        Application application = applicationService.getApplicationById(id);
-        if (application == null) {
-            redirectAttributes.addFlashAttribute("error", "Application not found with ID: " + id);
-            return "redirect:/fo/applications";
-        }
-        java.math.BigDecimal premium = premiumService.calculatePremium(application);
-        model.addAttribute("application", application);
-        model.addAttribute("premium", premium);
-        return "fo/calculate_premium";
-    }
 
     @PostMapping("/finalize-application")
     public String finalizeApplication(@RequestParam("applicationId") int applicationId, @RequestParam("annualPremium") java.math.BigDecimal annualPremium, HttpSession session, RedirectAttributes redirectAttributes) {
