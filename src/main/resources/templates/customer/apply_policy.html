@@ -21,7 +21,7 @@
     <div class="main-content">
         <div class="form-container">
             <h2 class="mb-4 text-center" style="color: var(--primary-color);">New Policy Application</h2>
-            <form th:action="@{/customer/apply}" th:object="${application}" method="post">
+            <form th:action="@{/customer/apply-policy}" th:object="${application}" method="post">
                 <div class="mb-3">
                     <label for="productType" class="form-label">Product Type</label>
                     <select class="form-select" id="productType" th:field="*{productType}" required>

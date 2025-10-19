@@ -100,4 +100,11 @@ public class SiaController {
         }
         return "redirect:/sia/claims";
     }
+
+    @GetMapping("/assessment/delete/{id}")
+    public String deleteAssessment(@PathVariable int id, RedirectAttributes redirectAttributes) {
+        riskAssessmentService.deleteRiskAssessment(id);
+        redirectAttributes.addFlashAttribute("success", "Assessment deleted successfully!");
+        return "redirect:/sia/reports";
+    }
 }

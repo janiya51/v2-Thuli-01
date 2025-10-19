@@ -136,4 +136,11 @@ public class FoController {
         model.addAttribute("payments", paymentService.getAllPayments());
         return "fo/view_payment_history";
     }
+
+    @GetMapping("/remove-unused-schedules/{id}")
+    public String removeUnusedSchedules(@PathVariable int id, RedirectAttributes redirectAttributes) {
+        paymentService.removeUnusedSchedules(id);
+        redirectAttributes.addFlashAttribute("success", "Unused schedules removed successfully!");
+        return "redirect:/fo/payments";
+    }
 }

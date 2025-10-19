@@ -11,10 +11,12 @@ import java.util.List;
 public class PolicyService {
 
     private final PolicyRepository policyRepository;
+    private final PremiumService premiumService;
 
     @Autowired
-    public PolicyService(PolicyRepository policyRepository) {
+    public PolicyService(PolicyRepository policyRepository, PremiumService premiumService) {
         this.policyRepository = policyRepository;
+        this.premiumService = premiumService;
     }
 
     public List<Policy> getAllPolicies() {
@@ -37,5 +39,16 @@ public class PolicyService {
         return policyRepository.findByApplicationUser(user).stream()
                 .filter(p -> p.getPolicyStatus() == Policy.PolicyStatus.Active)
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    public Policy createPolicyFromApplication(com.life_insurance_system.model.Application application) {
+        Policy policy = new Policy();
+        policy.setApplication(application);
+        policy.setPolicyNumber("POL-" + java.time.Year.now().getValue() + "-" + application.getApplicationId());
+        policy.setStartDate(new java.sql.Date(System.currentTimeMillis()));
+        java.math.BigDecimal premium = premiumService.calculatePremium(application);
+        policy.setAnnualPremium(premium);
+        policy.setPolicyStatus(Policy.PolicyStatus.Active);
+        return createPolicy(policy);
     }
 }

@@ -114,21 +114,12 @@ public class CseController {
             application.setCurrentStatus(Application.ApplicationStatus.Accepted);
             applicationService.updateApplication(application);
 
-            Policy policy = new Policy();
-            policy.setApplication(application);
-            policy.setPolicyNumber("POL-" + java.time.Year.now().getValue() + "-" + application.getApplicationId());
-            policy.setStartDate(new java.sql.Date(System.currentTimeMillis()));
-
-            java.math.BigDecimal premium = premiumService.calculatePremium(application);
-            policy.setAnnualPremium(premium);
-
-            policy.setPolicyStatus(Policy.PolicyStatus.Active);
-            policyService.createPolicy(policy);
+            Policy policy = policyService.createPolicyFromApplication(application);
 
             com.life_insurance_system.model.Payment payment = new com.life_insurance_system.model.Payment();
             payment.setPolicy(policy);
             payment.setFinanceOfficer(user);
-            payment.setAmount(premium);
+            payment.setAmount(policy.getAnnualPremium());
             payment.setPaymentDate(new java.sql.Date(System.currentTimeMillis()));
             payment.setType(com.life_insurance_system.model.Payment.PaymentType.Schedule);
             payment.setStatus(com.life_insurance_system.model.Payment.PaymentStatus.Due);
@@ -171,6 +162,13 @@ public class CseController {
         } else {
             redirectAttributes.addFlashAttribute("error", "Claim not found or cannot be forwarded.");
         }
+        return "redirect:/cse/claims";
+    }
+
+    @GetMapping("/claim/archive/{id}")
+    public String archiveClaim(@PathVariable int id, RedirectAttributes redirectAttributes) {
+        claimService.archiveClaim(id);
+        redirectAttributes.addFlashAttribute("success", "Claim archived successfully!");
         return "redirect:/cse/claims";
     }
 }

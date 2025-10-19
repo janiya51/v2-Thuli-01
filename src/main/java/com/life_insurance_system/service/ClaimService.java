@@ -34,4 +34,12 @@ public class ClaimService {
     public Claim updateClaim(Claim claim) {
         return claimRepository.save(claim);
     }
+
+    public void archiveClaim(int id) {
+        Claim claim = getClaimById(id);
+        if (claim != null && (claim.getClaimStatus() == Claim.ClaimStatus.Paid || claim.getClaimStatus() == Claim.ClaimStatus.Rejected)) {
+            claim.setClaimStatus(Claim.ClaimStatus.Archived);
+            claimRepository.save(claim);
+        }
+    }
 }
