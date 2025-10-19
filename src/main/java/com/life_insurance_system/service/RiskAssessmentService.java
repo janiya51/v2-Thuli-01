@@ -11,10 +11,12 @@ import java.util.List;
 public class RiskAssessmentService {
 
     private final RiskAssessmentRepository riskAssessmentRepository;
+    private final ApplicationService applicationService;
 
     @Autowired
-    public RiskAssessmentService(RiskAssessmentRepository riskAssessmentRepository) {
+    public RiskAssessmentService(RiskAssessmentRepository riskAssessmentRepository, ApplicationService applicationService) {
         this.riskAssessmentRepository = riskAssessmentRepository;
+        this.applicationService = applicationService;
     }
 
     public List<RiskAssessment> getAllRiskAssessments() {
@@ -23,5 +25,15 @@ public class RiskAssessmentService {
 
     public RiskAssessment createRiskAssessment(RiskAssessment riskAssessment) {
         return riskAssessmentRepository.save(riskAssessment);
+    }
+
+    public void deleteRiskAssessment(int id) {
+        RiskAssessment riskAssessment = riskAssessmentRepository.findById(id).orElse(null);
+        if (riskAssessment != null) {
+            com.life_insurance_system.model.Application application = applicationService.getApplicationById(riskAssessment.getApplication().getApplicationId());
+            if (application != null && application.getCurrentStatus() != com.life_insurance_system.model.Application.ApplicationStatus.Accepted) {
+                riskAssessmentRepository.deleteById(id);
+            }
+        }
     }
 }
