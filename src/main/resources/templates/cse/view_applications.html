@@ -37,7 +37,10 @@
                     <tbody>
                         <tr th:each="app : ${applications}">
                             <td th:text="${app.applicationId}"></td>
-                            <td th:text="${app.user.firstName + ' ' + app.user.lastName}"></td>
+                            <td>
+                                <span th:if="${app.user != null}" th:text="${app.user.firstName + ' ' + app.user.lastName}"></span>
+                                <span th:if="${app.user == null}" class="text-danger">N/A</span>
+                            </td>
                             <td th:text="${app.productType}"></td>
                             <td th:text="${'$' + #numbers.formatDecimal(app.desiredCoverage, 0, 'COMMA', 2, 'POINT')}"></td>
                             <td>
@@ -51,6 +54,14 @@
                                 <a th:href="@{/cse/application/{id}(id=${app.applicationId})}" class="btn btn-sm btn-primary">
                                     <i class="fas fa-eye"></i> View
                                 </a>
+                                <form th:action="@{/cse/application/updateStatus}" method="post" class="d-inline">
+                                    <input type="hidden" name="applicationId" th:value="${app.applicationId}" />
+                                    <select name="status" class="form-select-sm">
+                                        <option value="PendingSIA">Forward to SIA</option>
+                                        <option value="Incomplete">Request More Information</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-info">Update</button>
+                                </form>
                             </td>
                         </tr>
                     </tbody>
