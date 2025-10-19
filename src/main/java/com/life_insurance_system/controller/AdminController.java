@@ -150,8 +150,15 @@ public class AdminController {
 
     @PostMapping("/disputes/edit")
     public String editDispute(@ModelAttribute PolicyDispute dispute, RedirectAttributes redirectAttributes) {
-        policyDisputeService.updatePolicyDispute(dispute);
-        redirectAttributes.addFlashAttribute("success", "Dispute updated successfully!");
+        PolicyDispute existingDispute = policyDisputeService.getPolicyDisputeById(dispute.getDisputeId());
+        if (existingDispute != null) {
+            existingDispute.setReason(dispute.getReason());
+            existingDispute.setResolutionStatus(dispute.getResolutionStatus());
+            policyDisputeService.updatePolicyDispute(existingDispute);
+            redirectAttributes.addFlashAttribute("success", "Dispute updated successfully!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Dispute not found!");
+        }
         return "redirect:/admin/disputes";
     }
 
