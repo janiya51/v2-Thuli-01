@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policy Details - LIMS</title>
+    <link rel="icon" href="https://i.imgur.com/s41tGvI.png" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <button class="mobile-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+    <div th:replace="~{sidebar :: sidebar(activePage='policies', roleName='Customer')}"></div>
+    <div class="main-content">
+        <div class="details-container" th:if="${policy}">
+            <h2 class="mb-4">Policy Details for #<span th:text="${policy.policyNumber}"></span></h2>
+
+            <!-- Policy Info -->
+            <h4>Policy Information</h4>
+            <p><strong>Product:</strong> <span th:text="${policy.application.productType}"></span></p>
+            <p><strong>Coverage:</strong> <span th:text="${'$' + #numbers.formatDecimal(policy.application.desiredCoverage, 0, 'COMMA', 2, 'POINT')}"></span></p>
+            <p><strong>Annual Premium:</strong> <span th:text="${'$' + #numbers.formatDecimal(policy.annualPremium, 0, 'COMMA', 2, 'POINT')}"></span></p>
+            <p><strong>Status:</strong> <span class="badge bg-success" th:text="${policy.policyStatus}"></span></p>
+            <p><strong>Start Date:</strong> <span th:text="${#dates.format(policy.startDate, 'yyyy-MM-dd')}"></span></p>
+
+            <!-- Beneficiaries -->
+            <hr class="my-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Beneficiaries</h4>
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addBeneficiaryModal">
+                    <i class="fas fa-plus"></i> Add Beneficiary
+                </button>
+            </div>
+            <table class="table mt-3">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Relationship</th>
+                        <th>Share (%)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b : ${beneficiaries}">
+                        <td th:text="${b.name}"></td>
+                        <td th:text="${b.relationship}"></td>
+                        <td th:text="${b.sharePercentage}"></td>
+                        <td>
+                            <a th:href="@{/customer/policy/delete-beneficiary/{policyId}/{beneficiaryId}(policyId=${policy.policyId}, beneficiaryId=${b.beneficiaryId})}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Payment History -->
+            <hr class="my-4">
+            <h4>Payment History</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Amount</th>
+                        <th>Payment Date</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${payments}">
+                        <td th:text="${'$' + #numbers.formatDecimal(p.amount, 0, 'COMMA', 2, 'POINT')}"></td>
+                        <td th:text="${#dates.format(p.paymentDate, 'yyyy-MM-dd')}"></td>
+                        <td th:text="${p.type}"></td>
+                        <td><span class="badge" th:classappend="${p.status.name() == 'Paid' ? 'bg-success' : 'bg-warning'}" th:text="${p.status}"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <a href="/customer/policies" class="btn btn-secondary mt-3">Back to Policies</a>
+        </div>
+
+        <!-- Add Beneficiary Modal -->
+        <div class="modal fade" id="addBeneficiaryModal" tabindex="-1" aria-labelledby="addBeneficiaryModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addBeneficiaryModalLabel">Add New Beneficiary</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{/customer/policy/add-beneficiary}" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" name="policyId" th:value="${policy.policyId}" />
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="relationship" class="form-label">Relationship</label>
+                                <input type="text" class="form-control" id="relationship" name="relationship" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sharePercentage" class="form-label">Share Percentage</label>
+                                <input type="number" class="form-control" id="sharePercentage" name="sharePercentage" required min="1" max="100">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add Beneficiary</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('sidebarToggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('active'));
+    </script>
+</body>
+</html>
