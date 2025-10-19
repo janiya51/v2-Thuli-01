@@ -34,7 +34,14 @@ public class CustomerController {
     private SystemAnnouncementService systemAnnouncementService;
 
     @GetMapping("/dashboard")
-    public String customerDashboard() {
+    public String customerDashboard(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("applications", applicationService.getAllApplications().stream()
+                .filter(a -> a.getUser().getUserId() == user.getUserId())
+                .collect(java.util.stream.Collectors.toList()));
         return "customer/dashboard";
     }
 
@@ -125,5 +132,31 @@ public class CustomerController {
     public String viewAnnouncements(Model model) {
         model.addAttribute("announcements", systemAnnouncementService.getAllAnnouncements());
         return "customer/view_announcements";
+    }
+
+    @PostMapping("/application/accept")
+    public String acceptApplication(@RequestParam("applicationId") int applicationId, RedirectAttributes redirectAttributes) {
+        Application application = applicationService.getApplicationById(applicationId);
+        if (application != null && application.getCurrentStatus() == Application.ApplicationStatus.PendingCustomer) {
+            application.setCurrentStatus(Application.ApplicationStatus.Accepted);
+            applicationService.updateApplication(application);
+            redirectAttributes.addFlashAttribute("success", "Application accepted successfully!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Application cannot be accepted at this time.");
+        }
+        return "redirect:/customer/dashboard";
+    }
+
+    @PostMapping("/application/reject")
+    public String rejectApplication(@RequestParam("applicationId") int applicationId, RedirectAttributes redirectAttributes) {
+        Application application = applicationService.getApplicationById(applicationId);
+        if (application != null && application.getCurrentStatus() == Application.ApplicationStatus.PendingCustomer) {
+            application.setCurrentStatus(Application.ApplicationStatus.Rejected);
+            applicationService.updateApplication(application);
+            redirectAttributes.addFlashAttribute("success", "Application rejected successfully!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Application cannot be rejected at this time.");
+        }
+        return "redirect:/customer/dashboard";
     }
 }
