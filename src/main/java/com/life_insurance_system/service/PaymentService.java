@@ -12,13 +12,11 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PolicyService policyService;
-    private final ApplicationService applicationService;
 
     @Autowired
-    public PaymentService(PaymentRepository paymentRepository, PolicyService policyService, ApplicationService applicationService) {
+    public PaymentService(PaymentRepository paymentRepository, PolicyService policyService) {
         this.paymentRepository = paymentRepository;
         this.policyService = policyService;
-        this.applicationService = applicationService;
     }
 
     public List<Payment> getAllPayments() {
@@ -37,15 +35,12 @@ public class PaymentService {
 
     public void removeUnusedSchedules(int policyId) {
         com.life_insurance_system.model.Policy policy = policyService.getPolicyById(policyId);
-        if (policy != null) {
-            com.life_insurance_system.model.Application application = applicationService.getApplicationById(policy.getApplication().getApplicationId());
-            if (application != null && (application.getCurrentStatus() == com.life_insurance_system.model.Application.ApplicationStatus.Rejected || application.getCurrentStatus() == com.life_insurance_system.model.Application.ApplicationStatus.Cancelled)) {
-                List<Payment> payments = getPaymentsByPolicy(policy);
-                for (Payment payment : payments) {
-                    if (payment.getStatus() == Payment.PaymentStatus.Due) {
-                        payment.setStatus(Payment.PaymentStatus.Unused);
-                        paymentRepository.save(payment);
-                    }
+        if (policy != null && policy.getPolicyStatus() == com.life_insurance_system.model.Policy.PolicyStatus.Cancelled) {
+            List<Payment> payments = getPaymentsByPolicy(policy);
+            for (Payment payment : payments) {
+                if (payment.getStatus() == Payment.PaymentStatus.Due) {
+                    payment.setStatus(Payment.PaymentStatus.Unused);
+                    paymentRepository.save(payment);
                 }
             }
         }
