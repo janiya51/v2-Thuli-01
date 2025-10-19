@@ -34,14 +34,7 @@ public class CustomerController {
     private SystemAnnouncementService systemAnnouncementService;
 
     @GetMapping("/dashboard")
-    public String customerDashboard(Model model, HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/login";
-        }
-        model.addAttribute("applications", applicationService.getAllApplications().stream()
-                .filter(a -> a.getUser().getUserId() == user.getUserId())
-                .collect(java.util.stream.Collectors.toList()));
+    public String customerDashboard() {
         return "customer/dashboard";
     }
 
@@ -134,13 +127,26 @@ public class CustomerController {
         return "customer/view_announcements";
     }
 
+    @GetMapping("/my-applications")
+    public String myApplications(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("applications", applicationService.getAllApplications().stream()
+                .filter(a -> a.getUser().getUserId() == user.getUserId())
+                .collect(java.util.stream.Collectors.toList()));
+        return "customer/my_applications";
+    }
+
     @PostMapping("/application/accept")
     public String acceptApplication(@RequestParam("applicationId") int applicationId, RedirectAttributes redirectAttributes) {
         Application application = applicationService.getApplicationById(applicationId);
         if (application != null && application.getCurrentStatus() == Application.ApplicationStatus.PendingCustomer) {
             application.setCurrentStatus(Application.ApplicationStatus.Accepted);
             applicationService.updateApplication(application);
-            redirectAttributes.addFlashAttribute("success", "Application accepted successfully!");
+            policyService.createPolicyFromApplication(application);
+            redirectAttributes.addFlashAttribute("success", "Application accepted and policy created successfully!");
         } else {
             redirectAttributes.addFlashAttribute("error", "Application cannot be accepted at this time.");
         }

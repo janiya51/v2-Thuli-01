@@ -44,6 +44,12 @@
                 </a>
             </li>
             <li class="nav-item" th:if="${#strings.equals(roleName, 'Customer')}">
+                <a class="nav-link" href="/customer/my-applications" th:classappend="${activePage == 'my-applications'} ? 'active' : ''">
+                    <i class="fas fa-folder-open"></i>
+                    <span>My Applications</span>
+                </a>
+            </li>
+            <li class="nav-item" th:if="${#strings.equals(roleName, 'Customer')}">
                 <a class="nav-link" href="/customer/announcements" th:classappend="${activePage == 'announcements'} ? 'active' : ''">
                     <i class="fas fa-bullhorn"></i>
                     <span>Announcements</span>
